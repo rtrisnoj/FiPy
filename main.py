@@ -2,20 +2,19 @@
 from machine import ADC
 from machine import Pin
 from network import Sigfox
+from deepsleep import DeepSleep
 import socket
 import time
-
+import binascii
 
 #initiliaze massa sensor configuration (ADC)
 adc = ADC()
 adc.vref(3130)
 
-P13 = adc.channel(pin='P13',attn=ADC.ATTN_11DB)
-massaValue = P13.value()
+p13 = adc.channel(pin='P13',attn=ADC.ATTN_11DB)
 
 #initiliaze float sensor (GPIO pull up)
 p0 = Pin('P0',mode=Pin.IN, pull=Pin.PULL_UP)
-floatValue = p0.value()
     #floatValue = 1 if not tripped
     #floatValue = 0 if tripped, send alarm
 
@@ -24,7 +23,6 @@ p2 = Pin('P2',mode=Pin.OUT)
 p2.value(0)
 
 #Initiliaze Sigfox
-
 def sendMessage():
     #Sigfox
     sfx = Sigfox(mode=Sigfox.SIGFOX, rcz=Sigfox.RCZ2) # init Sigfox for RCZ2 (USA)
@@ -43,9 +41,16 @@ def sendMessage():
 while True:
     p2.value(0)
     time.sleep(5) #wait for 5 seconds
-    if (counter)
-    print("Massa value:" + str(P13.value()))
-    print("Float value:" + str(p0.value()))
+    #if (counter)
+    temp1 = "%04x" % p13.value()
+    temp2 = "%04x" % p0.value()
+    valueP13 = str(hex(p13.value())).lstrip("0x")
+    #print(valueP13.ljust(4, '0'))
+    print("Massa Value(Hex):" + temp1)
+    #print (valueP13)
+    print("Float Value:" + temp2)
+    #print("Massa value:" + str(P13.value()))
+    #print("Float value:" + str(p0.value()))
 
     #sendMessage()
 
