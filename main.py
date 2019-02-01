@@ -10,6 +10,12 @@ import time
 import binascii
 import sys
 
+#initiliaze
+counter = 0
+massaArray = []
+floatArray = []
+alarm = 1
+
 #initiliaze massa sensor configuration (ADC)
 adc = ADC()
 adc.vref(3130)
@@ -35,24 +41,53 @@ def sendMessage():
 
     s.setsockopt(socket.SOL_SIGFOX, socket.SO_RX, False) # configure it as uplink only
     s.send(str(massaHex))
-    s.send(str(floatHex))
+
     print("Sigfox Message Sent")
 
 
 while True:
-    pin_relay.value(0)
-    time.sleep(5) #wait for 5 seconds
-    #if (counter)
+    floatTripped = pin_float.value()
     massaHex = "%04x" % pin_massa.value()
     floatHex = "%04x" % pin_float.value()
-    #valueP13 = str(hex(pin_massa.value())).lstrip("0x")
-    print("Massa Value(Hex):" + massaHex)
-    print("Float Value:" + floatHex)
+
+    pin_relay.value(0)
+    time.sleep(5) #wait for 5 seconds
+
+    if(floatTripped):
+        if (counter < 3):
+            #valueP13 = str(hex(pin_massa.value())).lstrip("0x")
+
+            massaArray.append(massaHex)
+            floatArray.append(floatHex)
+            print("1")
+            print(massaArray)
+            print(floatArray)
+            counter = counter + 1
+            #sendMessage()
 
 
-    sendMessage()
+            #pin_float.callback(Pin.IRQ_FALLING | Pin.IRQ_RISING, pin_high_handler, pin_float)
+
+        else:
+            massaArray.append(massaHex)
+            floatArray.append(floatHex)
+
+            print("2")
+            print(massaArray)
+            print(floatArray)
+
+            counter = 0
+            massaArray.clear()
+            floatArray.clear()
+            sendMessage()
+
+    else:
+            print("Alarm")
+            print(massaHex)
+            print(floatHex)
+
+    print("Float Number:")
+    print(floatTripped)
+
     pin_relay.value(1)
-
-    #pin_float.callback(Pin.IRQ_FALLING | Pin.IRQ_RISING, pin_high_handler, pin_float)
-
-    time.sleep(60) #sleep for 30 mins
+    machine.deepsleep(3600000) #sleep for 30 mins
